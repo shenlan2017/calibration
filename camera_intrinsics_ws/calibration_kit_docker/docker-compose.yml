@@ -1,0 +1,24 @@
+version: '3.4'
+services:
+  calib-tools:
+    build:
+      context: docker
+      dockerfile: cpu.Dockerfile
+      network: host
+    image: shenlanxueyuan/calib-tools:v0
+    container_name: calib-tools
+    environment:
+      - XAUTHORITY
+      - DISPLAY=unix$DISPLAY
+      - GDK_SCALE
+      - GDK_DPI_SCALE
+      - XDG_RUNTIME_DIR=$XDG_RUNTIME_DIR
+      - DISPLAY=$DISPLAY
+      - TERM=xterm-color
+      - NVIDIA_DRIVER_CAPABILITIES=all
+    privileged: true
+    volumes:
+      - $PWD/workspace:/workspace
+      - /etc/localtime:/etc/localtime:ro
+      - /tmp/.X11-unix:/tmp/.X11-unix
+      - $XAUTHORITY:$XAUTHORITY
