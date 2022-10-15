@@ -1,0 +1,8 @@
+prefix=/usr/local
+
+Name: apollo2ros
+Description: Description of apollo2ros
+Version: 0.0.0
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: message_runtime message_generation roscpp sensor_msgs cv_bridge

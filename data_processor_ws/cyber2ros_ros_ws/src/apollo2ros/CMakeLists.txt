@@ -29,10 +29,6 @@ find_package(
     roslib
 )
 
-## Generate added messages and services with any dependencies listed here
-generate_messages(DEPENDENCIES
-  std_msgs
-)
 
 
 catkin_package(
@@ -47,6 +43,7 @@ catkin_package(
 include_directories(
     include ${catkin_INCLUDE_DIRS}
     ${catkin_INCLUDE_DIRS}
+    ${YAML_INCLUDE_DIRS}
     ${PROJECT_SOURCE_DIR}
     /usr/local/include/eigen3
 )
@@ -73,7 +70,7 @@ target_link_libraries(main PUBLIC
     common
     interface
     ezcfg::ezcfg
-
+    yaml-cpp
 )
 
 
