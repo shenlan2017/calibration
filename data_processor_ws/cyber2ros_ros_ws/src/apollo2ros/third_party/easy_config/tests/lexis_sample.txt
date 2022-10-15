@@ -1,0 +1,26 @@
+/*:*/:: </*<<*/ {{}}[[]](())>>..,,;; =/*==*\
+/ + +/*++*/ - -/*--*//\
+/\
+/ this is comment\
+me too
+
+'a' 'n' '*' '\n' '\075' '\55' '\x0f' //character
+
+"this "/***/"i\
+s " R"(s)" R"dd()dd"
+//dfgsgfds
+"tring\n\"""\e\s\c\"" true false
+R"a"&(
+)\
+a"
+)a"&"
+_0identify
+
+06'66ul
+96354llu
+0xffe5'5U
+3.6f
+5.999l
+0xff.55ap-06
+.5'66e80
+//

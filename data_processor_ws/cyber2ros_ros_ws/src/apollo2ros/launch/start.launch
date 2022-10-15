@@ -1,0 +1,3 @@
+<launch>
+    <node pkg="apollo2ros"  type="main"  name="apollo2ros"  output="screen"/>
+</launch>

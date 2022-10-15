@@ -1,0 +1,10 @@
+{
+    .generate_rosbag_name = "huzhou.bag",
+    .dag_folder_path = "/home/chen/apollo/huzhou_dump",
+    .camera_topic = "",
+    .imu_topic = "/camera/imu",
+    .lidar_topic = "/lidar/PointCloud2",
+    .odom_topic = "/canbus/chassis",
+    .gnss_topic = "/gnss/bestpose",
+    .rtk_topic = "/gnss/odometry",
+}
