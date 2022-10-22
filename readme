@@ -1,0 +1,82 @@
+编译image_collect：
+cd ~/shenlan/calibration/camera_intrinsics_ws/image_collect_ros_ws
+
+catkin_make
+
+source devel/setup.bash
+
+roslaunch usb_cam usb_cam.launch
+
+source devel/setup.bash
+
+roslaunch cam_collect cam_collect.launch
+
+编译calibration_kit：
+
+cd ~/shenlan/calibration/camera_intrinsics_ws/calibration_kit_docker/workspace/calibration_kit
+
+sudo apt install libboost-dev libopencv-dev libeigen3-dev libpcl-dev libceres-dev libyaml-cpp-dev
+
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
+
+cmake --build build --parallel 4
+
+./build/calibration_kit
+
+编译camera2lidar：
+
+cd ~/shenlan/calibration/camera2lidar_ws/bin
+
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
+
+cmake --build build --parallel 4
+
+./run_lidar2camera \
+../test/1.jpeg \
+../test/1.pcd \
+../test/front_6mm_intrinsics.yaml \
+../test/front_6mm_extrinsics.yaml
+
+编译lidar2ins：
+cd ~/shenlan/calibration/lidar2ins_ros_ws
+
+sudo apt-get install libglm-dev libglfw3-dev
+
+sudo apt-get install ros-melodic-geodesy ros-melodic-pcl-ros ros-melodic-nmea-msgs ros-melodic-libg2o
+
+catkin_make -j4
+
+编译ceres：
+cd ~/shenlan/calibration/3rdparty/ceres-solver
+
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
+
+cmake --build build --parallel 4
+
+编译Pangolin：
+
+cd ~/shenlan/calibration/3rdparty/Pangolin
+
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
+
+cmake --build build --parallel 4
+
+编译pose_align：
+
+cd ~/shenlan/calibration/lidar2ins_non_ros_ws/pose_align/build
+
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
+
+cmake --build build --parallel 4
+
+./pose_align /home/neousys/apollo/data/bag/calib_lidar2ins/parsed_data/00000/pcd
+
+
+
+
+
+
+
+
+
+
