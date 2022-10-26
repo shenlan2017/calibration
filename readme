@@ -1,4 +1,5 @@
 编译image_collect：
+
 cd ~/shenlan/calibration/camera_intrinsics_ws/image_collect_ros_ws
 
 catkin_make
@@ -38,6 +39,7 @@ cmake --build build --parallel 4
 ../test/front_6mm_extrinsics.yaml
 
 编译lidar2ins：
+
 cd ~/shenlan/calibration/lidar2ins_ros_ws
 
 sudo apt-get install libglm-dev libglfw3-dev
@@ -47,6 +49,7 @@ sudo apt-get install ros-melodic-geodesy ros-melodic-pcl-ros ros-melodic-nmea-ms
 catkin_make -j4
 
 编译ceres：
+
 cd ~/shenlan/calibration/3rdparty/ceres-solver
 
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
@@ -70,13 +73,3 @@ cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
 cmake --build build --parallel 4
 
 ./pose_align /home/neousys/apollo/data/bag/calib_lidar2ins/parsed_data/00000/pcd
-
-
-
-
-
-
-
-
-
-
