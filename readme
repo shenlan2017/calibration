@@ -40,7 +40,7 @@ cd ~/shenlan/calibration/camera_intrinsics_ws/calibration_kit_docker/workspace/c
 
 ./calibration_kit
 
-## camera2lidar
+## camera2lidar_ws
 
 1. Pangolin
 
@@ -72,7 +72,7 @@ cd ~/shenlan/calibration/camera2lidar_ws/bin
 ../test/front_6mm_intrinsics.yaml \
 ../test/front_6mm_extrinsics.yaml
 
-## lidar2ins
+## lidar2ins_non_ros_ws
 
 1. ceres
 
@@ -100,7 +100,7 @@ cd ~/shenlan/calibration/lidar2ins_non_ros_ws/pose_align/build
 
 ./pose_align /home/neousys/apollo/data/bag/calib_lidar2ins/parsed_data/00000/pcd
 
-3. lidar2ins
+## lidar2ins_ros_ws
 
 编译：
 
