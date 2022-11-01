@@ -54,7 +54,7 @@ namespace pose_align {
 
                 Transform delta_src_pos = base_pos.inverse() * cur_src_pos;
 
-                Eigen::Vector3f euler_angle = delta_pos.rotation_.matrix().eulerAngles(2, 1, 0);
+                Eigen::Vector3d euler_angle = delta_pos.rotation_.matrix().eulerAngles(2, 1, 0);
                 double yaw = std::abs(euler_angle[0] * 180 / 3.1415926);
                 double dist = delta_pos.translation_.norm();
 
@@ -94,9 +94,9 @@ namespace pose_align {
         }
 
         ceres::Solve(options, &problem, &summary);
-        Eigen::Quaternionf quat_result(quaternion[3], quaternion[0], quaternion[1],
+        Eigen::Quaterniond quat_result(quaternion[3], quaternion[0], quaternion[1],
                                         quaternion[2]);
-        Eigen::Vector3f tras_result = Eigen::Vector3f(translation[0], translation[1], translation[2]);
+        Eigen::Vector3d tras_result = Eigen::Vector3d(translation[0], translation[1], translation[2]);
         Transform pose_result;
         pose_result.rotation_ = quat_result;
         pose_result.translation_ = tras_result;
@@ -105,7 +105,7 @@ namespace pose_align {
 
         std::cout<<"the extrinsic is "<<std::endl;
         std::cout<<"pose_result quaternion is "<<pose_result.rotation_.coeffs().transpose()<<std::endl;
-        std::cout<<"pose_result eular is "<<pose_result.rotation_.matrix().eulerAngles(2, 0, 1).transpose() * 180 / 3.1415926<<std::endl;
+        std::cout<<"pose_result eular is "<<pose_result.rotation_.matrix().eulerAngles(2, 0, 1).transpose() <<std::endl;
         std::cout<<"pose_result translation is "<<pose_result.translation_.transpose()<<std::endl;
 
         pcl::PointCloud<pcl::PointXYZ>::Ptr target_pts(new pcl::PointCloud<pcl::PointXYZ>);
@@ -114,12 +114,12 @@ namespace pose_align {
         for(int i = 0; i < odom_size; i++){
             Transform pose_tgt = odom_target.getOdomTransformOfidx(i);
             pose_tgt = pose_result.inverse() * pose_tgt * pose_result;
-            Eigen::Vector3f translation_tgt = pose_tgt.translation_;
+            Eigen::Vector3d translation_tgt = pose_tgt.translation_;
             target_pts->points.push_back(pcl::PointXYZ(translation_tgt.x(), translation_tgt.y(), translation_tgt.z()));
 
             Transform pose_sor = odom_source.getOdomTransformOfidx(i);
             // pose_sor = pose_result.inverse() * pose_sor * pose_result;
-            Eigen::Vector3f translation_sor = pose_sor.translation_;
+            Eigen::Vector3d translation_sor = pose_sor.translation_;
             source_pts->points.push_back(pcl::PointXYZ(translation_sor.x(), translation_sor.y(), translation_sor.z()));
 
         }

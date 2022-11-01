@@ -2,18 +2,22 @@
 #include <ros/ros.h>
 #include <ros/package.h>
 #include <rosbag/bag.h>
+#include <std_msgs/Float64MultiArray.h>
 #include <sensor_msgs/Imu.h>
 #include <sensor_msgs/NavSatFix.h>
 #include <sensor_msgs/PointCloud2.h>
 #include <sensor_msgs/PointCloud.h>
 #include <sensor_msgs/point_cloud_conversion.h>
 #include <nav_msgs/Odometry.h>
-#include <geometry_msgs/QuaternionStamped.h>
+#include <geometry_msgs/TwistStamped.h>
 #include <interpreter.hpp>
 #include "interface/DataReader.h"
 #include "common/logger.hpp"
 #include "common/time_conversion.hpp"
 #include "config/config.h"
+
+#define M_PI 3.14159265358979323846   /* pi */
+#define M_PI_2 1.57079632679489661923 /* pi/2 */
 
 using namespace std;
 
@@ -39,6 +43,109 @@ int main(int argc, char *argv[])
     if (conf.camera_topic != "" && std::find(topic_folder.begin(), topic_folder.end(), dag_folder_path + "/image") != topic_folder.end())
     {
         // todo:
+    }
+
+    if (conf.rtk_topic != "" && std::find(topic_folder.begin(), topic_folder.end(), dag_folder_path + "/rtk_pose") != topic_folder.end())
+    {
+        std::deque<std::vector<double>> ins_status;
+        if (std::find(topic_folder.begin(), topic_folder.end(), dag_folder_path + "/ins_stat") != topic_folder.end())
+        {
+            std::vector<std::string> stat_files;
+            interface::DataReader::ReadFolder(dag_folder_path + "/ins_stat", stat_files, 0);
+            sort(stat_files.begin(), stat_files.end());
+            for (auto &f : stat_files)
+            {
+                std::ifstream file_stream(f, std::ios::in);
+                std::string drop_line, line;
+                getline(file_stream, drop_line);
+                getline(file_stream, drop_line);
+                getline(file_stream, line);
+                if (!line.empty())
+                {
+                    std::stringstream ss;
+                    ss << line;
+                    std::vector<double> input(3, 0.0);
+                    ss >> input[0];
+                    ss >> input[1];
+                    ss >> input[2];
+                    ins_status.emplace_back(input);
+                }
+                file_stream.close();
+            }
+        }
+        else
+        {
+            AWARN << "FAIL TO GET INS STATUS!";
+        }
+        std::vector<std::string> rtk_files;
+        interface::DataReader::ReadFolder(dag_folder_path + "/rtk_pose", rtk_files, 0);
+        sort(rtk_files.begin(), rtk_files.end());
+        if (ins_status.size() < rtk_files.size())
+        {
+            AERROR << "FAIL TO MATCH INS STATUS!";
+            return -1;
+        }
+        // bool init_flag = false;
+        // float init_position_x = 0.0f;
+        // float init_position_y = 0.0f;
+        int count = 0;
+        for (auto &f : rtk_files)
+        {
+            std::ifstream file_stream(f, std::ios::in);
+            std::string drop_line, line;
+            getline(file_stream, drop_line);
+            getline(file_stream, drop_line);
+            getline(file_stream, line);
+            if (!line.empty())
+            {
+                std::stringstream ss;
+                ss << line;
+                nav_msgs::Odometry rtk_msg;
+                double measurement_time = 0.0f;
+                ss >> measurement_time;
+                rtk_msg.header.stamp = ros::Time(measurement_time);
+                rtk_msg.header.frame_id = "rtk";
+                ss >> rtk_msg.pose.pose.position.x;
+                ss >> rtk_msg.pose.pose.position.y;
+                ss >> rtk_msg.pose.pose.position.z;
+                // if (!init_flag){
+                //     init_flag = true;
+                //     init_position_x = rtk_msg.pose.pose.position.x;
+                //     init_position_y = rtk_msg.pose.pose.position.y;
+                // }else{
+                //     rtk_msg.pose.pose.position.x -= init_position_x;
+                //     rtk_msg.pose.pose.position.y -= init_position_y;
+                // }
+                // AINFO << rtk_msg.pose.pose.position.x;
+                // AINFO << rtk_msg.pose.pose.position.y;
+                ss >> rtk_msg.pose.pose.orientation.x;
+                ss >> rtk_msg.pose.pose.orientation.y;
+                ss >> rtk_msg.pose.pose.orientation.z;
+                ss >> rtk_msg.pose.pose.orientation.w;
+                ss >> rtk_msg.twist.twist.linear.x;
+                ss >> rtk_msg.twist.twist.linear.y;
+                ss >> rtk_msg.twist.twist.linear.z;
+                if (ins_status.size() != 0 && std::abs(measurement_time - ins_status[count][0]) < 0.02)
+                {
+                    // std::vector<double> cov(36, 0.0f);
+                    // cov[0] = ins_status[count][1];
+                    // cov[1] = ins_status[count][2];
+                    rtk_msg.pose.covariance[0] = ins_status[count][1];
+                    rtk_msg.pose.covariance[1] = ins_status[count][2];
+                }
+                else if (ins_status.size() != 0)
+                {
+                    AINFO << std::setprecision(16) << measurement_time;
+                    AINFO << std::setprecision(16) << ins_status[count][0];
+                    AERROR << "FAIL TO MATCH INS STATUS!";
+                    return -1;
+                }
+                // AINFO << rtk_msg.header.stamp;
+                target.write(conf.rtk_topic, rtk_msg.header.stamp, rtk_msg);
+            }
+            file_stream.close();
+            count++;
+        }
     }
 
     if (conf.imu_topic != "" && std::find(topic_folder.begin(), topic_folder.end(), dag_folder_path + "/imu") != topic_folder.end())
@@ -128,62 +235,13 @@ int main(int argc, char *argv[])
         }
     }
 
-    if (conf.rtk_topic != "" && std::find(topic_folder.begin(), topic_folder.end(), dag_folder_path + "/rtk_pose") != topic_folder.end())
-    {
-        std::vector<std::string> rtk_files;
-        interface::DataReader::ReadFolder(dag_folder_path + "/rtk_pose", rtk_files, 0);
-        sort(rtk_files.begin(), rtk_files.end());
-        // bool init_flag = false;
-        // float init_position_x = 0.0f;
-        // float init_position_y = 0.0f;
-        for (auto &f : rtk_files)
-        {
-            std::ifstream file_stream(f, std::ios::in);
-            std::string drop_line, line;
-            getline(file_stream, drop_line);
-            getline(file_stream, drop_line);
-            getline(file_stream, line);
-            if (!line.empty())
-            {
-                std::stringstream ss;
-                ss << line;
-                nav_msgs::Odometry rtk_msg;
-                double measurement_time = 0.0f;
-                ss >> measurement_time;
-                rtk_msg.header.stamp = ros::Time(measurement_time);
-                rtk_msg.header.frame_id = "rtk";
-                ss >> rtk_msg.pose.pose.position.x;
-                ss >> rtk_msg.pose.pose.position.y;
-                ss >> rtk_msg.pose.pose.position.z;
-                // if (!init_flag){
-                //     init_flag = true;
-                //     init_position_x = rtk_msg.pose.pose.position.x;
-                //     init_position_y = rtk_msg.pose.pose.position.y;
-                // }else{
-                //     rtk_msg.pose.pose.position.x -= init_position_x;
-                //     rtk_msg.pose.pose.position.y -= init_position_y;
-                // }
-                // AINFO << rtk_msg.pose.pose.position.x;
-                // AINFO << rtk_msg.pose.pose.position.y;
-                ss >> rtk_msg.pose.pose.orientation.x;
-                ss >> rtk_msg.pose.pose.orientation.y;
-                ss >> rtk_msg.pose.pose.orientation.z;
-                ss >> rtk_msg.pose.pose.orientation.w;
-                ss >> rtk_msg.twist.twist.linear.x;
-                ss >> rtk_msg.twist.twist.linear.y;
-                ss >> rtk_msg.twist.twist.linear.z;
-                // AINFO << imu_msg.header.stamp;
-                target.write(conf.rtk_topic, rtk_msg.header.stamp, rtk_msg);
-            }
-            file_stream.close();
-        }
-    }
-
     if (conf.odom_topic != "" && std::find(topic_folder.begin(), topic_folder.end(), dag_folder_path + "/chassis") != topic_folder.end())
     {
         std::vector<std::string> chassis_files;
         interface::DataReader::ReadFolder(dag_folder_path + "/chassis", chassis_files, 0);
         sort(chassis_files.begin(), chassis_files.end());
+        constexpr double wheel_speed_coeff = 1;
+        constexpr double dur_time = 0.01;
         for (auto &f : chassis_files)
         {
             std::ifstream file_stream(f, std::ios::in);
@@ -195,15 +253,33 @@ int main(int argc, char *argv[])
             {
                 std::stringstream ss;
                 ss << line;
-                geometry_msgs::QuaternionStamped chassis_msg;
+                geometry_msgs::TwistStamped chassis_msg;
                 double measurement_time = 0.0f;
                 ss >> measurement_time;
                 chassis_msg.header.stamp = ros::Time(measurement_time);
                 chassis_msg.header.frame_id = "rtk";
-                ss >> chassis_msg.quaternion.x;
-                ss >> chassis_msg.quaternion.y;
-                ss >> chassis_msg.quaternion.z;
-                ss >> chassis_msg.quaternion.w;
+                double tyre_speed[4];
+                double speed_mps, steering;
+                ss >> tyre_speed[0];
+                ss >> tyre_speed[1];
+                ss >> tyre_speed[2];
+                ss >> tyre_speed[3];
+                ss >> speed_mps;
+                ss >> steering;
+                double vehicle_speed = wheel_speed_coeff * speed_mps;
+                double vehicle_angle = 0.0f;
+                static constexpr double kEpsilon = 1e-6;
+                if (std::fabs(tyre_speed[0]) > kEpsilon)
+                {
+                    double kappa = tyre_speed[1] / tyre_speed[0];
+                    vehicle_angle = 2.0 * (kappa - 1) / (kappa + 1) * vehicle_speed / 1.465;
+                }
+                chassis_msg.twist.linear.x = vehicle_speed;
+                chassis_msg.twist.linear.y = 0.0f;
+                chassis_msg.twist.linear.z = 0.0f;
+                chassis_msg.twist.angular.x = 0.0f;
+                chassis_msg.twist.angular.y = 0.0f;
+                chassis_msg.twist.angular.z = vehicle_angle;
                 target.write(conf.odom_topic, chassis_msg.header.stamp, chassis_msg);
             }
             file_stream.close();
