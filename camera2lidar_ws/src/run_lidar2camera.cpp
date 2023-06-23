@@ -19,6 +19,8 @@
 #include <Eigen/Core>
 #include <iostream>
 #include <string>
+#include <iostream>
+#include <fstream>
 
 #include "extrinsic_param.hpp"
 #include "intrinsic_param.hpp"
@@ -494,8 +496,19 @@ int main(int argc, char **argv) {
   std::cout << "cam_extrinsic_final quaternion qx qy qz qw\n"
             << q.x() << " " << q.y() << " " << q.z() << " " << q.w()
             << std::endl;
-
-
-
+  
+  std::ofstream outFile;	
+	outFile.open("front_6mm_extrinsics.yaml");
+  outFile << "header:\n  seq: 0\n  frame_id: lidar\n  stamp:\n    nsecs: 0\n    secs: 0\n";
+  outFile << "child_frame_id: front_6mm\ntransform:\n  rotation:\n";
+  outFile << "  x: " << q.x() << std::endl;
+  outFile << "  y: " << q.y() << std::endl;
+  outFile << "  z: " << q.z() << std::endl;
+  outFile << "  w: " << q.w() << std::endl;
+  outFile << "translation:\n";
+  outFile << "  x: " << translation_[0] << std::endl;
+  outFile << "  y: " << translation_[1] << std::endl;
+  outFile << "  z: " << translation_[2] << std::endl;
+  outFile.close();
   return 0;
 }

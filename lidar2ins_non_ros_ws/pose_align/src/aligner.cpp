@@ -108,6 +108,20 @@ namespace pose_align {
         std::cout<<"pose_result eular is "<<pose_result.rotation_.matrix().eulerAngles(2, 0, 1).transpose() <<std::endl;
         std::cout<<"pose_result translation is "<<pose_result.translation_.transpose()<<std::endl;
 
+        std::ofstream outFile;	
+        outFile.open("lidar_novatel_extrinsics.yaml");
+        outFile << "header:\n  seq: 0\n  frame_id: novatel\n  stamp:\n    nsecs: 0\n    secs: 0\n";
+        outFile << "child_frame_id: lidar\ntransform:\n  rotation:\n";
+        outFile << "  x: " << pose_result.rotation_.x() << std::endl;
+        outFile << "  y: " << pose_result.rotation_.y() << std::endl;
+        outFile << "  z: " << pose_result.rotation_.z() << std::endl;
+        outFile << "  w: " << pose_result.rotation_.w() << std::endl;
+        outFile << "translation:\n";
+        outFile << "  x: " << pose_result.translation_[0] << std::endl;
+        outFile << "  y: " << pose_result.translation_[1] << std::endl;
+        outFile << "  z: " << pose_result.translation_[2] << std::endl;
+        outFile.close();
+
         pcl::PointCloud<pcl::PointXYZ>::Ptr target_pts(new pcl::PointCloud<pcl::PointXYZ>);
         pcl::PointCloud<pcl::PointXYZ>::Ptr source_pts(new pcl::PointCloud<pcl::PointXYZ>);
 

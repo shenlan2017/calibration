@@ -55,6 +55,7 @@ namespace pose_align {
         }
 
         std::string lidar_slam_pose = data_path + "/lidar_slam_pose.txt";
+        // std::cout << "lidar_slam_pose : " << lidar_slam_pose << std::endl;
         std::ifstream fin_slam(lidar_slam_pose.c_str());
 
         if (!fin_slam.eof()) {
