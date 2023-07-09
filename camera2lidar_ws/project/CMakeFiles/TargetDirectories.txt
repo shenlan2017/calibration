@@ -1,3 +1,0 @@
-/home/t/calibration/camera2lidar_ws/project/CMakeFiles/rebuild_cache.dir
-/home/t/calibration/camera2lidar_ws/project/CMakeFiles/run_lidar2camera.dir
-/home/t/calibration/camera2lidar_ws/project/CMakeFiles/edit_cache.dir
