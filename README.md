@@ -1,15 +1,26 @@
-## camera_intrinsics_ws
+# shenlan_calibration安装说明
 
-1. cam_collect
+[toc]
+
+
+
+## 1.camera_intrinsics_ws
+
+### 1.1.cam_collect
 
 编译：
 
+```sh
 cd ~/shenlan/calibration/camera_intrinsics_ws/cam_collect_ros_ws
 
 catkin_make
+```
+
+
 
 运行：
 
+```sh
 cd ~/shenlan/calibration/camera_intrinsics_ws/cam_collect_ros_ws   
 
 source devel/setup.bash
@@ -21,11 +32,15 @@ cd ~/shenlan/calibration/camera_intrinsics_ws/cam_collect_ros_ws
 source devel/setup.bash
 
 roslaunch cam_collect cam_collect.launch
+```
 
-2. calibration_kit
+
+
+### 1.2.calibration_kit
 
 编译：
 
+```sh
 sudo apt install libboost-dev libopencv-dev libeigen3-dev libpcl-dev libceres-dev libyaml-cpp-dev
 
 cd ~/shenlan/calibration/camera_intrinsics_ws/calibration_kit_docker/workspace/calibration_kit
@@ -33,37 +48,53 @@ cd ~/shenlan/calibration/camera_intrinsics_ws/calibration_kit_docker/workspace/c
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
 
 cmake --build build --parallel 4
+```
+
+
 
 运行：
 
+```sh
 cd ~/shenlan/calibration/camera_intrinsics_ws/calibration_kit_docker/workspace/calibration_kit/build
 
 ./calibration_kit
+```
 
-## camera2lidar_ws
 
-1. Pangolin
+
+## 2.camera2lidar_ws
+
+### 2.1.Pangolin
 
 编译：
 
+```sh
 cd ~/shenlan/calibration/3rdparty/Pangolin
 
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
 
 cmake --build build --parallel 4
+```
 
-2. camera2lidar
+
+
+### 2.2.camera2lidar
 
 编译：
 
+```sh
 cd ~/shenlan/calibration/camera2lidar_ws
 
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
 
 cmake --build build --parallel 4
+```
+
+
 
 运行：
 
+```sh
 cd ~/shenlan/calibration/camera2lidar_ws/bin
 
 ./run_lidar2camera \
@@ -71,39 +102,55 @@ cd ~/shenlan/calibration/camera2lidar_ws/bin
 ../test/1.pcd \
 ../test/front_6mm_intrinsics.yaml \
 ../test/front_6mm_extrinsics.yaml
+```
 
-## lidar2ins_non_ros_ws
 
-1. ceres
+
+## 3.lidar2ins_non_ros_ws
+
+### 3.1.ceres
 
 编译：
 
+```sh
 cd ~/shenlan/calibration/3rdparty/ceres-solver
 
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
 
 cmake --build build --parallel 4
+```
 
-2. pose_align
+
+
+### 3.2.pose_align
 
 编译：
 
+```sh
 cd ~/shenlan/calibration/lidar2ins_non_ros_ws/pose_align
 
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
 
 cmake --build build --parallel 4
+```
+
+
 
 运行：
 
+```sh
 cd ~/shenlan/calibration/lidar2ins_non_ros_ws/pose_align/build
 
 ./pose_align /home/neousys/apollo/data/bag/calib_lidar2ins/parsed_data/00000/pcd
+```
 
-## lidar2ins_ros_ws
+
+
+## 4.lidar2ins_ros_ws
 
 编译：
 
+```sh
 sudo apt-get install libglm-dev libglfw3-dev
 
 sudo apt-get install ros-melodic-geodesy ros-melodic-pcl-ros ros-melodic-nmea-msgs ros-melodic-libg2o
@@ -111,9 +158,13 @@ sudo apt-get install ros-melodic-geodesy ros-melodic-pcl-ros ros-melodic-nmea-ms
 cd ~/shenlan/calibration/lidar2ins_ros_ws
 
 catkin_make -j4
+```
+
+
 
 运行：
 
+```sh
 roscore
 
 cd ~/shenlan/calibration/lidar2ins_ros_ws
@@ -121,4 +172,7 @@ cd ~/shenlan/calibration/lidar2ins_ros_ws
 source devel/setup.bash
 
 rosrun interactive_slam odometry2graph
+```
+
+
 
